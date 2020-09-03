@@ -15,6 +15,16 @@ local screenH =200
 
 
 
+local function getAdress(x, y)
+
+    return x + (320 * (math.floor(y / 8))) + ((y % 8) * 8000)
+
+end
+
+
+
+
+
 function love.load()
 
     engine.load()
