@@ -1,0 +1,12 @@
+-- Formule (en partant de 0,0) pour le mode non linéaire
+-- On a 25 lignes de 8 pixels de haut (200 / 8 = 25), et 320 pixels de large
+-- La ligne de pixels 1 est à la position 0 de la vram
+-- Pour venir sur la ligne de pixels 2 on doit avancer de 8000 (25 lignes * 320)
+-- Pour venir sur la ligne de pixels 3 on doit avancer de 8000 * 2, etc.
+-- Pour avancer de 8 lignes on doit avancer de 320 dans la mémoire
+-- On calcule donc déjà sur quelle ligne de 8 pixels on se trouve : nY/8
+-- Et on avance de 320 fois ce nombre
+-- On calcule ensuite le modulo de nY/8 pour savoir de combien de fois 8000 on doit avancer
+-- Exemple : nY = 1 (donc 2ème ligne de pixels) => 1 modulo 8 = 1 => 1 * 8000
+-- Exemple : nY = 2 (donc 3ème ligne de pixels) => 2 modulo 8 = 2 => 2 * 8000
+-- ((math.floor(nY / 8)) * 320) + ((nY % 8) * 8000) + nX
