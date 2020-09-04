@@ -7,6 +7,7 @@
 ]]
 
 io.stdout:setvbuf('no')
+love.math.setRandomSeed(love.timer.getTime())
 
 local engine = require('engine')
 local models = require('models')
@@ -16,6 +17,10 @@ local screenH =200
 local cellSize = 10
 local map = {}
 local mapOld = {}
+local ticTimer = 1
+local tic = false
+local snake = {}
+local mouses = {}
 
 
 
@@ -25,6 +30,32 @@ local function getAdress(x, y)
 
     return x + (320 * (math.floor(y / 8))) + ((y % 8) * 8000)
 
+end
+
+
+
+
+
+local function addMouse()
+   
+    local validPosition = false
+    repeat
+
+        local randLine = love.math.random(1, #map)
+        local randColumn = love.math.random(1, #map[1])
+
+        if map[randLine][randColumn] == models.ground.id then
+            table.insert(mouses, {
+                line = randLine,
+                column = randColumn
+            })
+            map[randLine][randColumn] = models.mouse.id
+            validPosition = true
+        end
+    
+    until validPosition
+
+    
 end
 
 
@@ -57,6 +88,9 @@ function love.load()
 
     engine.load()
 
+
+
+    -- Création de la grille et initialisation
     for line = 1, screenH / cellSize do
         map[line] = {}
         mapOld[line] = {}
@@ -66,6 +100,24 @@ function love.load()
         end
     end
 
+
+
+    -- Création du serpent au milieu de la map
+    snake[1] = {
+        type = 'snakeHead',
+        direction = 'right',
+        line = math.floor(#map / 2),
+        column = math.floor(#map[1] / 2)
+    }
+    snake[2] = {
+        type = 'snake',
+        line = math.floor(#map / 2),
+        column = math.floor(#map[1] / 2) + 1
+    }
+
+    -- Création de la première souris
+    addMouse()
+
 end
 
 
@@ -74,9 +126,30 @@ end
 
 function love.update(dt)
 
+    -- Tic
+    ticTimer = ticTimer - dt
+    if ticTimer < 0 then
+        ticTimer = 1
+        tic = true
+    else
+        tic = false
+    end
+
+
+
+    -- Mise à jour des cellules 'serpent'
+    for i = 1, #snake do
+        local s = snake[i]
+
+        map[s.line][s.column] = models[s.type].id
+
+    end
+
+
+
     -- Affichage des cellules mise à jour
-    for line = 1, screenH / cellSize do
-        for column = 1, screenW /cellSize do
+    for line = 1, #map do
+        for column = 1, #map[line] do
 
             if map[line][column] ~= mapOld[line][column] then
                 local schema
@@ -93,6 +166,8 @@ function love.update(dt)
         end
     end
     
+
+
     engine.update(dt)
 
 end
