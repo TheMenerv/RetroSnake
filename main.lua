@@ -17,10 +17,18 @@ local screenH =200
 local cellSize = 10
 local map = {}
 local mapOld = {}
-local ticTimer = 1
+local ticTimer = 0.2
 local tic = false
 local snake = {}
 local mouses = {}
+local direction = {}
+direction.up = 'up'
+direction.right = 'right'
+direction.down = 'down'
+direction.left = 'left'
+local snakeType = {}
+snakeType.head = 'snakeHead'
+snakeType.body = 'snakeBody'
 
 
 
@@ -56,6 +64,29 @@ local function addMouse()
     until validPosition
 
     
+end
+
+
+
+
+
+local function moveSnake(pDirection)
+
+    local actualDirection = snake[1].direction
+
+    if
+        pDirection ~= actualDirection and
+        (
+            (pDirection == direction.up and actualDirection ~= direction.down) or
+            (pDirection == direction.right and actualDirection ~= direction.left) or
+            (pDirection == direction.down and actualDirection ~= direction.up) or
+            (pDirection == direction.left and actualDirection ~= direction.right)
+        )
+    then
+        print(pDirection)
+        snake[1].nextDirection = pDirection
+    end
+
 end
 
 
@@ -104,15 +135,16 @@ function love.load()
 
     -- Création du serpent au milieu de la map
     snake[1] = {
-        type = 'snakeHead',
-        direction = 'right',
+        type = snakeType.head,
+        direction = direction.right,
+        nextDirection = direction.right,
         line = math.floor(#map / 2),
         column = math.floor(#map[1] / 2)
     }
     snake[2] = {
-        type = 'snake',
+        type = snakeType.body,
         line = math.floor(#map / 2),
-        column = math.floor(#map[1] / 2) + 1
+        column = math.floor(#map[1] / 2) - 1
     }
 
     -- Création de la première souris
@@ -129,7 +161,7 @@ function love.update(dt)
     -- Tic
     ticTimer = ticTimer - dt
     if ticTimer < 0 then
-        ticTimer = 1
+        ticTimer = 0.2
         tic = true
     else
         tic = false
@@ -137,10 +169,52 @@ function love.update(dt)
 
 
 
+    -- Mise à jour position du serpent
+    if tic then
+        snake[1].direction = snake[1].nextDirection
+        for i = #snake, 1, -1 do
+            local s = snake[i]
+
+            -- Corp
+            if i > 1 then
+                snake[i].line = snake[i - 1].line
+                snake[i].column = snake[i - 1].column
+
+            -- Tête
+            else
+                if s.direction == direction.up then
+                    s.line = s.line - 1
+                elseif s.direction == direction.right then
+                    s.column = s.column + 1
+                elseif s.direction == direction.down then
+                    s.line = s.line + 1
+                elseif s.direction == direction.left then
+                    s.column = s.column - 1
+                end
+            end
+
+        end
+    end
+
+
+
     -- Mise à jour des cellules 'serpent'
+    for line = 1, #map do
+        for column = 1, #map[line] do
+            if
+                map[line][column] == models.snakeBody.id or
+                map[line][column] == models.snakeHead.id
+            then
+                map[line][column] = models.ground.id
+            end
+        end
+    end
     for i = 1, #snake do
         local s = snake[i]
-
+        if s.line < 1 then s.line = #map end
+        if s.line > #map then s.line = 1 end
+        if s.column < 1 then s.column = #map[1] end
+        if s.column > #map[1] then s.column = 1 end
         map[s.line][s.column] = models[s.type].id
 
     end
@@ -179,5 +253,21 @@ end
 function love.keypressed(key)
 
     if key == 'escape' then love.event.quit() end
+
+    if key == 'z' or key == 'up' then
+        moveSnake(direction.up)
+    end
+
+    if key == 'd' or key == 'right' then
+        moveSnake(direction.right)
+    end
+
+    if key == 's' or key == 'down' then
+        moveSnake(direction.down)
+    end
+
+    if key == 'q' or key == 'left' then
+        moveSnake(direction.left)
+    end
 
 end

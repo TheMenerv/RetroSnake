@@ -1,6 +1,6 @@
 return {
 
-  snake = {
+  snakeBody = {
     id = 1,
     schema = {
       {0,0,0,1,1,1,1,0,0,0},
