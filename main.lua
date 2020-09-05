@@ -172,16 +172,12 @@ function love.update(dt)
     -- Mise à jour position du serpent
     if tic then
         snake[1].direction = snake[1].nextDirection
+        local lastTail = snake[#snake]
         for i = #snake, 1, -1 do
             local s = snake[i]
 
-            -- Corp
-            if i > 1 then
-                snake[i].line = snake[i - 1].line
-                snake[i].column = snake[i - 1].column
-
             -- Tête
-            else
+            if i == 1 then
                 if s.direction == direction.up then
                     s.line = s.line - 1
                 elseif s.direction == direction.right then
@@ -191,6 +187,25 @@ function love.update(dt)
                 elseif s.direction == direction.left then
                     s.column = s.column - 1
                 end
+                -- Mange une souris
+                for j = #mouses, 1, -1 do
+                    local mouse = mouses[j]
+                    if
+                        s.line == mouse.line and
+                        s.column == mouse.column
+                    then
+                        table.remove(mouses, j)
+                        table.insert(snake, {
+                            type = snakeType.body,
+                            line = lastTail.line,
+                            column = lastTail.column
+                        })
+                        addMouse()
+                    end
+                end
+            else
+                snake[i].line = snake[i - 1].line
+                snake[i].column = snake[i - 1].column
             end
 
         end
