@@ -17,7 +17,8 @@ local screenH =200
 local cellSize = 10
 local map = {}
 local mapOld = {}
-local ticTimer = 0.2
+local speed = 0.1
+local ticTimer = speed
 local tic = false
 local snake = {}
 local mouses = {}
@@ -29,6 +30,7 @@ direction.left = 'left'
 local snakeType = {}
 snakeType.head = 'snakeHead'
 snakeType.body = 'snakeBody'
+local highScore = 0
 
 
 
@@ -116,6 +118,11 @@ end
 
 local function reset()
 
+    highScore = #snake - 2
+    if highScore < 0 then highScore = 0 end
+
+    love.window.setTitle("GC20 System Emulation Running... High Score: "..highScore)
+
     map = {}
     snake = {}
     mouses = {}
@@ -176,7 +183,7 @@ function love.update(dt)
     -- Tic
     ticTimer = ticTimer - dt
     if ticTimer < 0 then
-        ticTimer = 0.2
+        ticTimer = speed
         tic = true
     else
         tic = false
