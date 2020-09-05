@@ -118,8 +118,12 @@ end
 
 local function reset()
 
-    highScore = #snake - 2
-    if highScore < 0 then highScore = 0 end
+    local score = #snake - 2
+    if score < 0 then score = 0 end
+
+    if score > highScore then
+        highScore = score
+    end
 
     love.window.setTitle("GC20 System Emulation Running... High Score: "..highScore)
 
