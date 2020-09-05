@@ -83,7 +83,6 @@ local function moveSnake(pDirection)
             (pDirection == direction.left and actualDirection ~= direction.right)
         )
     then
-        print(pDirection)
         snake[1].nextDirection = pDirection
     end
 
@@ -115,11 +114,15 @@ end
 
 
 
-function love.load()
+local function reset()
 
-    engine.load()
-
-
+    map = {}
+    snake = {}
+    mouses = {}
+    ticTimer = 3
+    for i = 0, (320 * 200 - 1) do
+        GC20.SetVRAM(i, 0)
+    end
 
     -- Création de la grille et initialisation
     for line = 1, screenH / cellSize do
@@ -149,6 +152,18 @@ function love.load()
 
     -- Création de la première souris
     addMouse()
+
+end
+
+
+
+
+
+function love.load()
+
+    engine.load()
+
+    reset()
 
 end
 
@@ -201,6 +216,16 @@ function love.update(dt)
                             column = lastTail.column
                         })
                         addMouse()
+                    end
+                end
+                -- Mange la queue
+                for k = 2, #snake do
+                    if
+                        s.line == snake[k].line and
+                        s.column == snake[k].column
+                    then
+                        reset()
+                        return
                     end
                 end
             else
