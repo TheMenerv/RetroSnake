@@ -8,7 +8,6 @@
 
 io.stdout:setvbuf('no')
 love.math.setRandomSeed(love.timer.getTime())
-love.math.setRandomSeed(1)
 
 local engine = require('engine')
 local models = require('models')
@@ -32,6 +31,7 @@ local snakeType = {}
 snakeType.head = 'snakeHead'
 snakeType.body = 'snakeBody'
 local highScore = 0
+local score = 0
 
 
 
@@ -124,14 +124,12 @@ end
 
 local function reset()
 
-    local score = #snake - 2
-    if score < 0 then score = 0 end
-
     if score > highScore then
         highScore = score
     end
+    score = 0
 
-    love.window.setTitle("GC20 System Emulation Running... High Score: "..highScore)
+    love.window.setTitle("GC20 System Emulation Running... High Score: "..highScore.." Score: "..score)
 
     map = {}
     snake = {}
@@ -259,6 +257,8 @@ function love.update(dt)
                             column = lastTail.column
                         })
                         addMouse()
+                        score = score + 1
+                        love.window.setTitle("GC20 System Emulation Running... High Score: "..highScore.." Score: "..score)
                     end
                 end
                 -- Déplacement
