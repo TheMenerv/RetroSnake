@@ -8,6 +8,7 @@
 
 io.stdout:setvbuf('no')
 love.math.setRandomSeed(love.timer.getTime())
+love.math.setRandomSeed(1)
 
 local engine = require('engine')
 local models = require('models')
@@ -54,18 +55,23 @@ local function addMouse()
         local randLine = love.math.random(1, #map)
         local randColumn = love.math.random(1, #map[1])
 
-        if map[randLine][randColumn] == models.ground.id then
+        validPosition = true
+        for i = 1, #snake do
+            local s = snake[i]
+            if s.line == randLine and s.column == randColumn then
+                validPosition = false
+            end
+        end
+
+        if validPosition then
             table.insert(mouses, {
                 line = randLine,
                 column = randColumn
             })
-            map[randLine][randColumn] = models.mouse.id
-            validPosition = true
         end
     
     until validPosition
 
-    
 end
 
 
@@ -195,6 +201,41 @@ function love.update(dt)
 
 
 
+    -- Mise à jour des cellules vides
+    for line = 1, #map do
+        for column = 1, #map[line] do
+            if
+                map[line][column] == models.snakeBody.id or
+                map[line][column] == models.snakeHead.id or
+                map[line][column] == models.mouse.id
+            then
+                map[line][column] = models.ground.id
+            end
+        end
+    end
+
+
+
+    -- Mise à jour des cellules 'souris'
+    for j = 1, #mouses do
+        local mouse = mouses[j]
+        map[mouse.line][mouse.column] = models.mouse.id
+    end
+
+
+
+    -- Mise à jour des cellules 'serpent'
+    for i = 1, #snake do
+        local s = snake[i]
+        if s.line < 1 then s.line = #map end
+        if s.line > #map then s.line = 1 end
+        if s.column < 1 then s.column = #map[1] end
+        if s.column > #map[1] then s.column = 1 end
+        map[s.line][s.column] = models[s.type].id
+    end
+
+
+
     -- Mise à jour position du serpent
     if tic then
         snake[1].direction = snake[1].nextDirection
@@ -204,15 +245,6 @@ function love.update(dt)
 
             -- Tête
             if i == 1 then
-                if s.direction == direction.up then
-                    s.line = s.line - 1
-                elseif s.direction == direction.right then
-                    s.column = s.column + 1
-                elseif s.direction == direction.down then
-                    s.line = s.line + 1
-                elseif s.direction == direction.left then
-                    s.column = s.column - 1
-                end
                 -- Mange une souris
                 for j = #mouses, 1, -1 do
                     local mouse = mouses[j]
@@ -228,6 +260,16 @@ function love.update(dt)
                         })
                         addMouse()
                     end
+                end
+                -- Déplacement
+                if s.direction == direction.up then
+                    s.line = s.line - 1
+                elseif s.direction == direction.right then
+                    s.column = s.column + 1
+                elseif s.direction == direction.down then
+                    s.line = s.line + 1
+                elseif s.direction == direction.left then
+                    s.column = s.column - 1
                 end
                 -- Mange la queue
                 for k = 2, #snake do
@@ -245,29 +287,6 @@ function love.update(dt)
             end
 
         end
-    end
-
-
-
-    -- Mise à jour des cellules 'serpent'
-    for line = 1, #map do
-        for column = 1, #map[line] do
-            if
-                map[line][column] == models.snakeBody.id or
-                map[line][column] == models.snakeHead.id
-            then
-                map[line][column] = models.ground.id
-            end
-        end
-    end
-    for i = 1, #snake do
-        local s = snake[i]
-        if s.line < 1 then s.line = #map end
-        if s.line > #map then s.line = 1 end
-        if s.column < 1 then s.column = #map[1] end
-        if s.column > #map[1] then s.column = 1 end
-        map[s.line][s.column] = models[s.type].id
-
     end
 
 
